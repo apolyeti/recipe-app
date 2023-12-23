@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gocolly/colly"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -17,8 +18,9 @@ type Ingredient struct {
 		]}
 	*/
 	// should be list of ingredients
-	Name     string `json:"ingredient"` // name of ingredient
-	Quantity string `json:"quantity"`   // quantity of ingredient
+	Name        string `json:"ingredient"`  // name of ingredient
+	Quantity    string `json:"quantity"`    // quantity of ingredient
+	Measurement string `json:"measurement"` // measurement of ingredient
 }
 
 type Recipe struct {
@@ -52,25 +54,49 @@ func getIngredients(c echo.Context) error {
 	r := &Recipe{
 		Ingredients: []Ingredient{
 			{
-				Name:     url,
-				Quantity: "0",
+				Name:        url,
+				Quantity:    "0",
+				Measurement: "cups",
 			},
 			{
-				Name:     "ingredient2",
-				Quantity: "quantity2",
+				Name:        "ingredient2",
+				Quantity:    "quantity2",
+				Measurement: "grams",
 			},
 		},
 	}
+	scrapeURL(url)
 	return c.JSON(http.StatusOK, r)
+}
+
+func scrapeURL(url string) {
+	fmt.Println("scraping url:", url)
+	// Instantiate default collector
+	c := colly.NewCollector()
+
+	ingredients := ""
+	// find an element with a class that contains "ingredient"
+	c.OnHTML("[class*=ingredient]", func(e *colly.HTMLElement) {
+		ingredients += e.Text + "\n"
+		fmt.Println(ingredients)
+	})
+
+	err := c.Visit(url)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	// Now use OpenAI Api to format the ingredients
+
 }
 
 func main() {
 	e := echo.New()
 	e.Use(middleware.CORS())
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	// e.GET("/", func(c echo.Context) error {
+	// 	return c.String(http.StatusOK, "Hello, World!")
+	// })
 
 	e.POST("/api/ingredients", getIngredients)
 
