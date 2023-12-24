@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/gocolly/colly"
 	"github.com/labstack/echo/v4"
@@ -37,6 +41,25 @@ type Recipe struct {
 
 type URL struct {
 	Name string `json:"url"`
+}
+
+// create struct for OpenAI response body
+type OpenAI struct {
+	Choices []struct {
+		Index   int `json:"index"`
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+		Logprobs      string `json:"logprobs"`
+		Finish_reason string `json:"finish_reason"`
+	} `json:"choices"`
+	Usage struct {
+		Prompt_tokens     int `json:"prompt_tokens"`
+		Completion_tokens int `json:"completion_tokens"`
+		Total_tokens      int `json:"total_tokens"`
+	} `json:"usage"`
+	System_fingerprint string `json:"system_fingerprint"`
 }
 
 func getIngredients(c echo.Context) error {
@@ -76,7 +99,7 @@ func scrapeURL(url string) {
 
 	ingredients := ""
 	// find an element with a class that contains "ingredient"
-	c.OnHTML("[class*=ingredient]", func(e *colly.HTMLElement) {
+	c.OnHTML("[class*=ingredients]", func(e *colly.HTMLElement) {
 		ingredients += e.Text + "\n"
 		fmt.Println(ingredients)
 	})
@@ -87,10 +110,88 @@ func scrapeURL(url string) {
 	}
 
 	// Now use OpenAI Api to format the ingredients
+	recipe_list := openAI(ingredients)
+	fmt.Println("recipe_list:\n", recipe_list)
+}
 
+func openAI(ingredients string) string {
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		fmt.Println("OPENAI_API_KEY not set")
+		os.Exit(1)
+	}
+
+	apiEndpoint := "https://api.openai.com/v1/chat/completions"
+
+	promptFile := "prompt.txt"
+	prompt, err := ioutil.ReadFile(promptFile)
+	prompt_string := string(prompt)
+
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	payload := map[string]interface{}{
+		"model": "gpt-3.5-turbo",
+		"messages": []map[string]string{
+			{"role": "system", "content": prompt_string},
+			{"role": "user", "content": ingredients},
+		},
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println("error:", err)
+		return "ERROR"
+	}
+
+	req, err := http.NewRequest("POST", apiEndpoint, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		fmt.Println("error:", err)
+		return "ERROR"
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("error:", err)
+		return "ERROR"
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("error:", err)
+		return "ERROR"
+	}
+
+	fmt.Println(string(body))
+
+	var openAIResponse OpenAI
+	err = json.Unmarshal(body, &openAIResponse)
+	if err != nil {
+		fmt.Println("error:", err)
+		return "ERROR"
+	}
+
+	if len(openAIResponse.Choices) == 0 {
+		fmt.Println("error: no choices")
+		return "ERROR"
+	}
+
+	return openAIResponse.Choices[0].Message.Content
+
+	// get body.choices.message.content[0]
+
+	// return body.choices.message.content[0]
 }
 
 func main() {
+
 	e := echo.New()
 	e.Use(middleware.CORS())
 
