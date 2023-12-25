@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -95,7 +96,18 @@ func cleanRecipe(recipe string) Recipe {
 		// split line by ","
 		ingredient_info := strings.Split(line, ",")
 		// if there are 3 elements in ingredient_info, then there is a quantity, measurement, and ingredient
+		// truncate float to 2 decimal places
 		if len(ingredient_info) == 3 {
+			if ingredient_info[1] == "0.0" || ingredient_info[1] == "0" || ingredient_info[2] == "None" {
+				continue
+			}
+			// chekc if quantity is a number, if it is not, skip
+			if _, err := strconv.ParseFloat(ingredient_info[1], 64); err != nil {
+				continue
+			}
+			// if len(ingredient_info[1]) >= 3 {
+			// 	ingredient_info[1] = strings.TrimSpace(ingredient_info[1][:4])
+			// }
 			var ingredient = Ingredient{
 				Name:        ingredient_info[0],
 				Quantity:    ingredient_info[1],
