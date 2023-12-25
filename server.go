@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gocolly/colly"
 	"github.com/labstack/echo/v4"
@@ -22,7 +23,7 @@ type Ingredient struct {
 		]}
 	*/
 	// should be list of ingredients
-	Name        string `json:"ingredient"`  // name of ingredient
+	Name        string `json:"name"`        // name of ingredient
 	Quantity    string `json:"quantity"`    // quantity of ingredient
 	Measurement string `json:"measurement"` // measurement of ingredient
 }
@@ -74,25 +75,39 @@ func getIngredients(c echo.Context) error {
 	// print url to console
 	url := requestBody.Name
 	fmt.Println("url:", url)
-	r := &Recipe{
-		Ingredients: []Ingredient{
-			{
-				Name:        url,
-				Quantity:    "0",
-				Measurement: "cups",
-			},
-			{
-				Name:        "ingredient2",
-				Quantity:    "quantity2",
-				Measurement: "grams",
-			},
-		},
-	}
-	scrapeURL(url)
+
+	r := scrapeURL(url)
+	// return recipe as json
 	return c.JSON(http.StatusOK, r)
 }
 
-func scrapeURL(url string) {
+func cleanRecipe(recipe string) Recipe {
+	// split recipe into lines by \n
+	// and then split each line by ","
+	// and for each string, remove leading and trailing whitespace
+	// and then join the strings back together with ","
+	recl := strings.Split(recipe, "\n")
+	// make new recipe to return
+	var r Recipe
+	for i, line := range recl {
+		recl[i] = strings.TrimSpace(line)
+		fmt.Println("line:", line)
+		// split line by ","
+		ingredient_info := strings.Split(line, ",")
+		// if there are 3 elements in ingredient_info, then there is a quantity, measurement, and ingredient
+		if len(ingredient_info) == 3 {
+			var ingredient = Ingredient{
+				Name:        ingredient_info[0],
+				Quantity:    ingredient_info[1],
+				Measurement: ingredient_info[2],
+			}
+			r.Ingredients = append(r.Ingredients, ingredient)
+		}
+	}
+	return r
+}
+
+func scrapeURL(url string) Recipe {
 	fmt.Println("scraping url:", url)
 	// Instantiate default collector
 	c := colly.NewCollector()
@@ -112,6 +127,11 @@ func scrapeURL(url string) {
 	// Now use OpenAI Api to format the ingredients
 	recipe_list := openAI(ingredients)
 	fmt.Println("recipe_list:\n", recipe_list)
+
+	// Now clean the recipe list
+	new_recipe := cleanRecipe(recipe_list)
+
+	return new_recipe
 }
 
 func openAI(ingredients string) string {
@@ -188,6 +208,7 @@ func openAI(ingredients string) string {
 	// get body.choices.message.content[0]
 
 	// return body.choices.message.content[0]
+
 }
 
 func main() {
