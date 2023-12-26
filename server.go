@@ -39,13 +39,15 @@ type Recipe struct {
 	*/
 	// should be list of ingredients
 	Ingredients []Ingredient `json:"recipe"`
+	ServingSize string       `json:"serving_size"`
 }
 
 type URL struct {
 	Name string `json:"url"`
 }
 
-// create struct for OpenAI response body
+// create struct to bind the OpenAI response body to, to then access the json's fields
+// we have to do this manually since we don't have a library to do it for us
 type OpenAI struct {
 	Choices []struct {
 		Index   int `json:"index"`
@@ -97,12 +99,7 @@ func cleanRecipe(recipe string) Recipe {
 		ingredient_info := strings.Split(line, ",")
 		if i == 0 {
 			// if first line, then it is the serving size
-			r.Ingredients = append(r.Ingredients,
-				Ingredient{
-					Name:        "Serving Size",
-					Quantity:    ingredient_info[0],
-					Measurement: "None",
-				})
+			r.ServingSize = strings.TrimSpace(ingredient_info[0])
 			continue
 		}
 		// if there are 3 elements in ingredient_info, then there is a quantity, measurement, and ingredient
