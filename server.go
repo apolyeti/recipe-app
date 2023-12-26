@@ -95,6 +95,16 @@ func cleanRecipe(recipe string) Recipe {
 		fmt.Println("line:", line)
 		// split line by ","
 		ingredient_info := strings.Split(line, ",")
+		if i == 0 {
+			// if first line, then it is the serving size
+			r.Ingredients = append(r.Ingredients,
+				Ingredient{
+					Name:        "Serving Size",
+					Quantity:    ingredient_info[0],
+					Measurement: "None",
+				})
+			continue
+		}
 		// if there are 3 elements in ingredient_info, then there is a quantity, measurement, and ingredient
 		// truncate float to 2 decimal places
 		if len(ingredient_info) == 3 {
@@ -109,9 +119,9 @@ func cleanRecipe(recipe string) Recipe {
 			// 	ingredient_info[1] = strings.TrimSpace(ingredient_info[1][:4])
 			// }
 			var ingredient = Ingredient{
-				Name:        ingredient_info[0],
-				Quantity:    ingredient_info[1],
-				Measurement: ingredient_info[2],
+				Name:        strings.TrimSpace(ingredient_info[0]),
+				Quantity:    strings.TrimSpace(ingredient_info[1]),
+				Measurement: strings.TrimSpace(ingredient_info[2]),
 			}
 			r.Ingredients = append(r.Ingredients, ingredient)
 		}
@@ -125,6 +135,25 @@ func scrapeURL(url string) Recipe {
 	c := colly.NewCollector()
 
 	ingredients := ""
+
+	// find text in an element that says "servings"
+	c.OnHTML("span:contains('Servings')", func(e *colly.HTMLElement) {
+		ingredients += e.Text + "\n"
+		fmt.Println(ingredients)
+	})
+
+	// find text in an element that says "serving"
+	c.OnHTML("span:contains('Serving')", func(e *colly.HTMLElement) {
+		ingredients += e.Text + "\n"
+		fmt.Println(ingredients)
+	})
+
+	// find element with class that contains "servings"
+	c.OnHTML("[class*=servings]", func(e *colly.HTMLElement) {
+		ingredients += e.Text + "\n"
+		fmt.Println(ingredients)
+	})
+
 	// find an element with a class that contains "ingredient"
 	c.OnHTML("[class*=ingredients]", func(e *colly.HTMLElement) {
 		ingredients += e.Text + "\n"
@@ -164,7 +193,7 @@ func openAI(ingredients string) string {
 	}
 
 	payload := map[string]interface{}{
-		"model": "gpt-3.5-turbo",
+		"model": "gpt-4",
 		"messages": []map[string]string{
 			{"role": "system", "content": prompt_string},
 			{"role": "user", "content": ingredients},
