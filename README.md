@@ -1,6 +1,6 @@
 # Backend Repository for Recipe-Scaler
 
-I built this project because I wanted to be able to scale recipes quickly rather than performing calculations on each and every single ingredient, especially for dishes that have a lot of ingredients, or are very specific like for baking. My goal for this project was to be able to allow me and other people who use this app to be able to scale recipes quickly and easily, and just be able to focus on cooking, rather than doing math.
+I built this project because I wanted to be able to scale recipes quickly rather than performing calculations on each and every single ingredient, especially for dishes with many ingredients. My goal for this project was to be able to allow me and other people who use this app to be able to scale recipes quickly and easily, and just be able to focus on cooking, rather than doing math.
 
 ## Tools Used
 
