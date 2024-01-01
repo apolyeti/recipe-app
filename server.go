@@ -108,7 +108,7 @@ func cleanRecipe(recipe string) Recipe {
 			if ingredient_info[1] == "0.0" || ingredient_info[1] == "0" || ingredient_info[2] == "None" {
 				continue
 			}
-			// chekc if quantity is a number, if it is not, skip
+			// check if quantity is a number, if it is not, skip
 			if _, err := strconv.ParseFloat(ingredient_info[1], 64); err != nil {
 				continue
 			}
