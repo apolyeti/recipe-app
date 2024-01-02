@@ -10,6 +10,8 @@ I built this project using Golang's Echo framework, and used Colly's Web scrapin
 
 Because OpenAI API has no proper library for Golang, I had to perform http requests using Golang's native http library, and parse out the JSON response myself. I had to create structs that matched the same structure as a response body of OpenAI's API, which was my first time working with APIs using no known librares. This was moreso a tedious process rather than a challenge, but nonetheless gave me a larger understanding of Golang's syntax and its native libraries. 
 
+## Demo
+
 ![demo1](https://cdn.discordapp.com/attachments/685747553815625760/1191201064570073178/image.png?ex=65a49371&is=65921e71&hm=44b950b3f6c5576959b8b95424771003dff2469bc2071c449761686151617459&)
 ![demo2](https://cdn.discordapp.com/attachments/685747553815625760/1191201284947181608/image.png?ex=65a493a5&is=65921ea5&hm=18f4967042a68372c7e87193914633ad43f852d23d4981b851a00d2f08a328b1&)
 
