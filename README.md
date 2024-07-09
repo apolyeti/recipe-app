@@ -12,6 +12,7 @@ Because OpenAI API has no proper library for Golang, I had to perform http reque
 
 ## Demo
 
-![demo1](https://cdn.discordapp.com/attachments/685747553815625760/1191201064570073178/image.png?ex=65a49371&is=65921e71&hm=44b950b3f6c5576959b8b95424771003dff2469bc2071c449761686151617459&)
-![demo2](https://cdn.discordapp.com/attachments/685747553815625760/1191201284947181608/image.png?ex=65a493a5&is=65921ea5&hm=18f4967042a68372c7e87193914633ad43f852d23d4981b851a00d2f08a328b1&)
-
+![demo1](https://cdn.discordapp.com/attachments/685747553815625760/1260353893158617128/image.png?ex=668f0388&is=668db208&hm=e861a0ca7123d93cce0c0636a975adb0a7364898c03e024ec2e64934a39563de&)
+![demo2](https://cdn.discordapp.com/attachments/685747553815625760/1260353949773336606/image.png?ex=668f0395&is=668db215&hm=aba77c140fe371be3d27cb3c930e70be87d095f459c7b7708e05e94bd21947f9&)
+![demo3](https://cdn.discordapp.com/attachments/685747553815625760/1260354052588568648/image.png?ex=668f03ae&is=668db22e&hm=fa10765a68aa4c36596ba93202329547766100bc69b63e4b557eb4dba3cd4d0a&)
+![demo3](https://cdn.discordapp.com/attachments/685747553815625760/1260354111631659089/image.png?ex=668f03bc&is=668db23c&hm=8b62b97d132da49961a2fa051b8b317bc7ac3fee4f4e2da25e366f5a2c19c4d1&)
